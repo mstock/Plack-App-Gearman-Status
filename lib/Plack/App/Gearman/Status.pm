@@ -126,7 +126,7 @@ sub new {
 
 	$self->job_servers({
 		map {
-			my ($host, $port) = $_ =~ m{^\[?([\w.:]+)\]?:(\d+)$};
+			my ($host, $port) = $self->parse_job_server_address($_);
 			$_ => Net::Telnet::Gearman->new(
 				Host => $host,
 				Port => $port,
@@ -142,6 +142,29 @@ sub new {
 	)->build());
 
 	return $self;
+}
+
+sub parse_job_server_address {
+	my ($self, $address) = @_;
+
+	unless (defined $address) {
+		croak("Required job server address parameter not passed");
+	}
+
+	$address =~ m{^
+		# IPv6 address or hostname/IPv4 address
+		(?:\[(?<host>[\d:]+)\]|(?<host>[\w.]+))
+		# Optional port
+		(?::(?<port>\d+))?
+	$}xms;
+	my $host = $+{host};
+	my $port = $+{port} || 4730;
+
+	unless (defined $host) {
+		croak("No valid job server address '$address' passed");
+	}
+
+	return ($host, $port);
 }
 
 sub get_status {

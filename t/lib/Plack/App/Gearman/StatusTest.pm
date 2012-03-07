@@ -55,6 +55,37 @@ sub get_status_test : Test(1) {
 }
 
 
+sub parse_job_server_address_test : Test(12) {
+	my ($self) = @_;
+
+	my $app = Plack::App::Gearman::Status->new();
+
+	my ($host, $port) = $app->parse_job_server_address('127.0.0.1:4730');
+	is($host, '127.0.0.1', 'host ok');
+	is($port, 4730, 'port ok');
+
+	($host, $port) = $app->parse_job_server_address('127.0.0.1');
+	is($host, '127.0.0.1', 'host ok');
+	is($port, 4730, 'port ok');
+
+	($host, $port) = $app->parse_job_server_address('localhost.localdomain:4730');
+	is($host, 'localhost.localdomain', 'host ok');
+	is($port, 4730, 'port ok');
+
+	($host, $port) = $app->parse_job_server_address('localhost.localdomain');
+	is($host, 'localhost.localdomain', 'host ok');
+	is($port, 4730, 'port ok');
+
+	($host, $port) = $app->parse_job_server_address('[::1]:4730');
+	is($host, '::1', 'host ok');
+	is($port, 4730, 'port ok');
+
+	($host, $port) = $app->parse_job_server_address('[::1]');
+	is($host, '::1', 'host ok');
+	is($port, 4730, 'port ok');
+}
+
+
 sub mock_gearman {
 	my ($self, $port) = @_;
 
