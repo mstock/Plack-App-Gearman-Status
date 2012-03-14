@@ -10,7 +10,8 @@ use Carp;
 use MRO::Compat;
 use Net::Telnet::Gearman;
 use Text::MicroTemplate;
-use Plack::Util::Accessor qw(job_servers template);
+use Try::Tiny;
+use Plack::Util::Accessor qw(job_servers template connections);
 
 =head1 SYNOPSIS
 
@@ -152,9 +153,11 @@ sub new {
 
 	my $self = $class->next::method(@arg);
 
-	$self->job_servers({
-		map { $_ => $self->connect($_) } @{$self->{job_servers}}
-	});
+	unless (ref $self->job_servers() eq 'ARRAY') {
+		$self->job_servers(['127.0.0.1:4730']);
+	}
+
+	$self->connections({});
 
 	$self->template(Text::MicroTemplate->new(
 		template   => $template_string,
@@ -233,7 +236,8 @@ Address of the job server to connect to.
 
 =head3 Result
 
-The L<Net::Telnet::Gearman|Net::Telnet::Gearman> instance.
+The L<Net::Telnet::Gearman|Net::Telnet::Gearman> instance on success, C<undef>
+otherwise.
 
 =cut
 
@@ -241,10 +245,17 @@ sub connect {
 	my ($self, $address) = @_;
 
 	my ($host, $port) = $self->parse_job_server_address($address);
-	return Net::Telnet::Gearman->new(
-		Host => $host,
-		Port => $port,
-	);
+	my $connection;
+	try {
+		$connection = Net::Telnet::Gearman->new(
+			Host => $host,
+			Port => $port,
+		);
+	}
+	catch {
+		carp $_;
+	};
+	return $connection;
 }
 
 
@@ -262,12 +273,24 @@ sub get_status {
 	my ($self) = @_;
 
 	my @result;
-	for my $job_server (keys %{$self->job_servers()}) {
-		push @result, {
-			job_server => $job_server,
-			workers    => [ $self->job_servers()->{$job_server}->workers() ],
-			status     => [ $self->job_servers()->{$job_server}->status() ],
-			version    => $self->job_servers()->{$job_server}->version(),
+	for my $job_server (@{$self->job_servers()}) {
+		unless (defined $self->connections()->{$job_server}) {
+			$self->connections()->{$job_server} = $self->connect($job_server);
+		}
+		try {
+			push @result, {
+				job_server => $job_server,
+				workers    => [ $self->connections()->{$job_server}->workers() ],
+				status     => [ $self->connections()->{$job_server}->status() ],
+				version    => $self->connections()->{$job_server}->version(),
+			};
+		}
+		catch {
+			delete $self->connections()->{$job_server};
+			push @result, {
+				job_server => $job_server,
+				error      => 'Failed to fetch status information from '.$job_server,
+			}
 		};
 	}
 

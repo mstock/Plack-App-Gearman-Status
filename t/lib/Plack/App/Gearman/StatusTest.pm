@@ -12,11 +12,17 @@ use IO::Socket::INET;
 
 use Plack::App::Gearman::Status;
 
-sub new_test: Test(1) {
+sub new_test: Test(3) {
 	my ($self) = @_;
 
 	my $app = Plack::App::Gearman::Status->new();
 	isa_ok($app, 'Plack::App::Gearman::Status', 'instance created');
+	is_deeply($app->job_servers(), ['127.0.0.1:4730'], 'default job server set');
+
+	$app = Plack::App::Gearman::Status->new({
+		job_servers => ['gearman.example.com:20293'],
+	});
+	is_deeply($app->job_servers(), ['gearman.example.com:20293'], 'job servers set');
 }
 
 sub get_status_test : Test(1) {
@@ -30,7 +36,7 @@ sub get_status_test : Test(1) {
 				job_servers => ['127.0.0.1:'.$port],
 			});
 			is_deeply($app->get_status(), [{
-				job_server => '127.0.0.1:10001',
+				job_server => '127.0.0.1:'.$port,
 				version    => '0.13',
 				status     => [{
 					busy    => 2,
