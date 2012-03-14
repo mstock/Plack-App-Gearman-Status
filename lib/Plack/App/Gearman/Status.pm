@@ -14,11 +14,18 @@ use Plack::Util::Accessor qw(job_servers template);
 
 =head1 SYNOPSIS
 
+In a C<.psgi> file:
+
 	use Plack::App::Gearman::Status;
 
-	my $app = Plack::App::Gearman::Status->new(
-		job_servers => ['127.0.0.1:4730']
-	);
+	my $app = Plack::App::Gearman::Status->new({
+		job_servers => ['127.0.0.1:4730'],
+	});
+
+As one-liner:
+
+	plackup -MPlack::App::Gearman::Status \
+		-e 'Plack::App::Gearman::Status->new({ job_servers => ["127.0.0.1:4730"] })->to_app'
 
 =head1 DESCRIPTION
 
@@ -119,6 +126,27 @@ chomp(my $template_string = <<'EOTPL');
 </html>
 EOTPL
 
+
+=head2 new
+
+Constructor, creates new L<Plack::App::Gearman::Status|Plack::App::Gearman::Status>
+instance.
+
+=head3 Parameters
+
+This method expects its parameters as a hash reference.
+
+=over
+
+=item job_servers
+
+Array reference with the addresses of the job servers the application should
+connect to.
+
+=back
+
+=cut
+
 sub new {
 	my ($class, @arg) = @_;
 
@@ -144,6 +172,30 @@ sub new {
 	return $self;
 }
 
+
+=head2 parse_job_server_address
+
+Parses a job server address of the form C<hostname:port> with optional C<port>.
+If no port is given, it defaults to C<4730>.
+
+=head3 Parameters
+
+This method expects positional parameters.
+
+=over
+
+=item address
+
+The address to parse.
+
+=back
+
+=head3 Result
+
+A list with host and port.
+
+=cut
+
 sub parse_job_server_address {
 	my ($self, $address) = @_;
 
@@ -167,6 +219,17 @@ sub parse_job_server_address {
 	return ($host, $port);
 }
 
+
+=head2 get_status
+
+Fetch status information from configured Gearman job servers.
+
+=head3 Result
+
+An array reference with hash references containing status information.
+
+=cut
+
 sub get_status {
 	my ($self) = @_;
 
@@ -183,6 +246,18 @@ sub get_status {
 	return \@result;
 }
 
+
+=head2 call
+
+Specialized call method which retrieves the job server status information and
+transforms it to HTML.
+
+=head3 Result
+
+A L<PSGI|PSGI> response.
+
+=cut
+
 sub call {
 	my ($self, $env) = @_;
 
@@ -192,6 +267,29 @@ sub call {
 		[ $self->template()->($self->get_status()) ]
 	];
 }
+
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+L<Plack|Plack> and L<Plack::Component|Plack::Component>.
+
+=item *
+
+L<Net::Telnet::Gearman|Net::Telnet::Gearman> which is used to access a Gearman
+job server.
+
+=item *
+
+C<gearman-stat.psgi> (L<https://github.com/tokuhirom/gearman-stat.psgi>) by
+TOKUHIROM which inspired this application.
+
+=back
+
+=cut
 
 1;
 
