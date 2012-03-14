@@ -55,6 +55,25 @@ sub get_status_test : Test(1) {
 }
 
 
+sub connect_test : Test(1) {
+	my ($self) = @_;
+
+	test_tcp(
+		client => sub {
+			my ($port) = @_;
+
+			my $app = Plack::App::Gearman::Status->new();
+			my $connection = $app->connect('127.0.0.1:'.$port);
+			isa_ok($connection, 'Net::Telnet::Gearman', 'connection ok');
+		},
+		server => sub {
+			my ($port) = @_;
+			$self->mock_gearman($port);
+		}
+	);
+}
+
+
 sub parse_job_server_address_test : Test(12) {
 	my ($self) = @_;
 

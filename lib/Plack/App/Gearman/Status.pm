@@ -153,13 +153,7 @@ sub new {
 	my $self = $class->next::method(@arg);
 
 	$self->job_servers({
-		map {
-			my ($host, $port) = $self->parse_job_server_address($_);
-			$_ => Net::Telnet::Gearman->new(
-				Host => $host,
-				Port => $port,
-			);
-		} @{$self->{job_servers}}
+		map { $_ => $self->connect($_) } @{$self->{job_servers}}
 	});
 
 	$self->template(Text::MicroTemplate->new(
@@ -217,6 +211,40 @@ sub parse_job_server_address {
 	}
 
 	return ($host, $port);
+}
+
+
+=head2 connect
+
+Connects to the given job server and returns the
+L<Net::Telnet::Gearman|Net::Telnet::Gearman> object.
+
+=head3 Parameters
+
+This method expects positional parameters.
+
+=over
+
+=item address
+
+Address of the job server to connect to.
+
+=back
+
+=head3 Result
+
+The L<Net::Telnet::Gearman|Net::Telnet::Gearman> instance.
+
+=cut
+
+sub connect {
+	my ($self, $address) = @_;
+
+	my ($host, $port) = $self->parse_job_server_address($address);
+	return Net::Telnet::Gearman->new(
+		Host => $host,
+		Port => $port,
+	);
 }
 
 
