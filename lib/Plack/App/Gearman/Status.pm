@@ -70,9 +70,13 @@ chomp(my $template_string = <<'EOTPL');
 				font-size: 1em;
 			}
 			p {
-				margin: 5px;
+				margin: 0px;
 				color: #444444;
 				font-size: 0.9em;
+			}
+			p.error {
+				text-align: center;
+				border: 1px solid #FFAAAA;
 			}
 			table {
 				width: 100%;
@@ -103,25 +107,51 @@ chomp(my $template_string = <<'EOTPL');
 	</head>
 	<body>
 		<h1>Gearman Server Status</h1>
-		<% for my $job_server (@{$_[0]}) { %>
-			<h2>Job server <code><%= $job_server->{job_server} %></code></h2>
-			<p>Server Version: <%= $job_server->{version} %></p>
+		<% for my $job_server_status (@{$_[0]}) { %>
+			<h2>Job server <code><%= $job_server_status->{job_server} %></code></h2>
+			<% if ($job_server_status->{error}) { %>
+				<p class="error"><%= $job_server_status->{error} %></p>
+			<% } else { %>
+				<p>Server Version: <%= $job_server_status->{version} %></p>
 
-			<h3>Workers</h3>
-			<table class="workers">
-				<tr><th>File Descriptor</th><th>IP Address</th><th>Client ID</th><th>Function</th></tr>
-				<% for my $worker (@{$job_server->{workers}}) { %>
-					<tr><td><%= $worker->file_descriptor() %></td><td><%= $worker->ip_address() %></td><td><%= $worker->client_id() %></td><td><%= join(', ', sort @{$worker->functions()}) %></td></tr>
-				<% } %>
-			</table>
+				<h3>Workers</h3>
+				<table class="workers">
+					<tr>
+						<th>File Descriptor</th>
+						<th>IP Address</th>
+						<th>Client ID</th>
+						<th>Functions</th>
+					</tr>
+					<% for my $worker (@{$job_server_status->{workers}}) { %>
+						<tr>
+							<td><%= $worker->file_descriptor() %></td>
+							<td><%= $worker->ip_address() %></td>
+							<td><%= $worker->client_id() %></td>
+							<td><%= join(', ', sort @{$worker->functions()}) %></td>
+						</tr>
+					<% } %>
+				</table>
 
-			<h3>Status</h3>
-			<table class="status">
-				<tr><th>Function</th><th>Total</th><th>Running</th><th>Available Workers</th><th>Queue</th></tr>
-				<% for my $status (@{$job_server->{status}}) { %>
-					<tr><td><%= $status->name() %></td><td><%= $status->running() %></td></td><td><%= $status->busy() %></td><td><%= $status->free() %></td><td><%= $status->queue() %></tr>
-				<% } %>
-			</table>
+				<h3>Status</h3>
+				<table class="status">
+					<tr>
+						<th>Function</th>
+						<th>Total</th>
+						<th>Running</th>
+						<th>Available Workers</th>
+						<th>Queue</th>
+					</tr>
+					<% for my $status (@{$job_server_status->{status}}) { %>
+						<tr>
+							<td><%= $status->name() %></td>
+							<td><%= $status->running() %></td>
+							<td><%= $status->busy() %></td>
+							<td><%= $status->free() %></td>
+							<td><%= $status->queue() %></td>
+						</tr>
+					<% } %>
+				</table>
+			<% } %>
 		<% } %>
 	</body>
 </html>
