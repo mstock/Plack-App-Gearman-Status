@@ -217,7 +217,7 @@ sub parse_job_server_address {
 }
 
 
-=head2 connect
+=head2 connection
 
 Connects to the given job server and returns the
 L<Net::Telnet::Gearman|Net::Telnet::Gearman> object.
@@ -241,7 +241,7 @@ otherwise.
 
 =cut
 
-sub connect {
+sub connection {
 	my ($self, $address) = @_;
 
 	my ($host, $port) = $self->parse_job_server_address($address);
@@ -275,7 +275,7 @@ sub get_status {
 	my @result;
 	for my $job_server (@{$self->job_servers()}) {
 		unless (defined $self->connections()->{$job_server}) {
-			$self->connections()->{$job_server} = $self->connect($job_server);
+			$self->connections()->{$job_server} = $self->connection($job_server);
 		}
 		try {
 			push @result, {

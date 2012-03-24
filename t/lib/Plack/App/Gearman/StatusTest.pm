@@ -61,7 +61,7 @@ sub get_status_test : Test(1) {
 }
 
 
-sub connect_test : Test(1) {
+sub connection_test : Test(1) {
 	my ($self) = @_;
 
 	test_tcp(
@@ -69,7 +69,7 @@ sub connect_test : Test(1) {
 			my ($port) = @_;
 
 			my $app = Plack::App::Gearman::Status->new();
-			my $connection = $app->connect('127.0.0.1:'.$port);
+			my $connection = $app->connection('127.0.0.1:'.$port);
 			isa_ok($connection, 'Net::Telnet::Gearman', 'connection ok');
 		},
 		server => sub {
