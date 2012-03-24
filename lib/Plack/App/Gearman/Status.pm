@@ -23,14 +23,17 @@ In a C<.psgi> file:
 		job_servers => ['127.0.0.1:4730'],
 	});
 
-As one-liner:
+As one-liner on the command line:
 
 	plackup -MPlack::App::Gearman::Status \
 		-e 'Plack::App::Gearman::Status->new({ job_servers => ["127.0.0.1:4730"] })->to_app'
 
 =head1 DESCRIPTION
 
-Plack::App::Gearman::Status displays the status of Gearman job servers.
+Plack::App::Gearman::Status displays the status of the configured Gearman job
+servers by fetching it using L<Net::Telnet::Gearman|Net::Telnet::Gearman> and
+turning it into a simple HTML page. This page contains information about the
+available workers and the status of the registered functions.
 
 =cut
 
