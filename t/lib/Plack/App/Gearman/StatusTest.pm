@@ -80,7 +80,7 @@ sub connection_test : Test(1) {
 }
 
 
-sub parse_job_server_address_test : Test(12) {
+sub parse_job_server_address_test : Test(16) {
 	my ($self) = @_;
 
 	my $app = Plack::App::Gearman::Status->new();
@@ -108,6 +108,12 @@ sub parse_job_server_address_test : Test(12) {
 	($host, $port) = $app->parse_job_server_address('[::1]');
 	is($host, '::1', 'host ok');
 	is($port, 4730, 'port ok');
+
+	for my $address (qw(:4930 []:2032 [localhost]:1039 [localhost])) {
+		throws_ok(sub {
+			$app->parse_job_server_address($address);
+		}, qr{Unable to parse address}, 'invalid address');
+	}
 }
 
 

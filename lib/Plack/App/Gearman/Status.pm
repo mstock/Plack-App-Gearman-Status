@@ -232,16 +232,12 @@ sub parse_job_server_address {
 
 	$address =~ m{^
 		# IPv6 address or hostname/IPv4 address
-		(?:\[(?<host>[\d:]+)\]|(?<host>[\w.]+))
+		(?:\[([\d:]+)\]|([\w.]+))
 		# Optional port
-		(?::(?<port>\d+))?
-	$}xms;
-	my $host = $+{host};
-	my $port = $+{port} || 4730;
-
-	unless (defined $host) {
-		croak("No valid job server address '$address' passed");
-	}
+		(?::(\d+))?
+	$}xms or croak("Unable to parse address '$address'");
+	my $host = $1 || $2;
+	my $port = $3 || 4730;
 
 	return ($host, $port);
 }
