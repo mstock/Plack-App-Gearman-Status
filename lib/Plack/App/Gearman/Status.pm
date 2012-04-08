@@ -1,4 +1,7 @@
 package Plack::App::Gearman::Status;
+{
+  $Plack::App::Gearman::Status::VERSION = '0.001000';
+}
 use parent qw(Plack::Component);
 
 # ABSTRACT: Plack application to display the status of Gearman job servers
@@ -13,29 +16,6 @@ use Text::MicroTemplate;
 use Try::Tiny;
 use Plack::Util::Accessor qw(job_servers template connections);
 
-=head1 SYNOPSIS
-
-In a C<.psgi> file:
-
-	use Plack::App::Gearman::Status;
-
-	my $app = Plack::App::Gearman::Status->new({
-		job_servers => ['127.0.0.1:4730'],
-	});
-
-As one-liner on the command line:
-
-	plackup -MPlack::App::Gearman::Status \
-		-e 'Plack::App::Gearman::Status->new({ job_servers => ["127.0.0.1:4730"] })->to_app'
-
-=head1 DESCRIPTION
-
-Plack::App::Gearman::Status displays the status of the configured Gearman job
-servers by fetching it using L<Net::Telnet::Gearman|Net::Telnet::Gearman> and
-turning it into a simple HTML page. This page contains information about the
-available workers and the status of the registered functions.
-
-=cut
 
 chomp(my $template_string = <<'EOTPL');
 <?xml version="1.0"?>
@@ -161,25 +141,6 @@ chomp(my $template_string = <<'EOTPL');
 EOTPL
 
 
-=head2 new
-
-Constructor, creates new L<Plack::App::Gearman::Status|Plack::App::Gearman::Status>
-instance.
-
-=head3 Parameters
-
-This method expects its parameters as a hash reference.
-
-=over
-
-=item job_servers
-
-Array reference with the addresses of the job servers the application should
-connect to.
-
-=back
-
-=cut
 
 sub new {
 	my ($class, @arg) = @_;
@@ -203,28 +164,6 @@ sub new {
 }
 
 
-=head2 parse_job_server_address
-
-Parses a job server address of the form C<hostname:port> with optional C<port>.
-If no port is given, it defaults to C<4730>.
-
-=head3 Parameters
-
-This method expects positional parameters.
-
-=over
-
-=item address
-
-The address to parse.
-
-=back
-
-=head3 Result
-
-A list with host and port.
-
-=cut
 
 sub parse_job_server_address {
 	my ($self, $address) = @_;
@@ -246,29 +185,6 @@ sub parse_job_server_address {
 }
 
 
-=head2 connection
-
-Connects to the given job server and returns the
-L<Net::Telnet::Gearman|Net::Telnet::Gearman> object.
-
-=head3 Parameters
-
-This method expects positional parameters.
-
-=over
-
-=item address
-
-Address of the job server to connect to.
-
-=back
-
-=head3 Result
-
-The L<Net::Telnet::Gearman|Net::Telnet::Gearman> instance on success, C<undef>
-otherwise.
-
-=cut
 
 sub connection {
 	my ($self, $address) = @_;
@@ -288,15 +204,6 @@ sub connection {
 }
 
 
-=head2 get_status
-
-Fetch status information from configured Gearman job servers.
-
-=head3 Result
-
-An array reference with hash references containing status information.
-
-=cut
 
 sub get_status {
 	my ($self) = @_;
@@ -327,16 +234,6 @@ sub get_status {
 }
 
 
-=head2 call
-
-Specialized call method which retrieves the job server status information and
-transforms it to HTML.
-
-=head3 Result
-
-A L<PSGI|PSGI> response.
-
-=cut
 
 sub call {
 	my ($self, $env) = @_;
@@ -348,6 +245,121 @@ sub call {
 	];
 }
 
+
+
+1;
+
+
+__END__
+=pod
+
+=head1 NAME
+
+Plack::App::Gearman::Status - Plack application to display the status of Gearman job servers
+
+=head1 VERSION
+
+version 0.001000
+
+=head1 SYNOPSIS
+
+In a C<.psgi> file:
+
+	use Plack::App::Gearman::Status;
+
+	my $app = Plack::App::Gearman::Status->new({
+		job_servers => ['127.0.0.1:4730'],
+	});
+
+As one-liner on the command line:
+
+	plackup -MPlack::App::Gearman::Status \
+		-e 'Plack::App::Gearman::Status->new({ job_servers => ["127.0.0.1:4730"] })->to_app'
+
+=head1 DESCRIPTION
+
+Plack::App::Gearman::Status displays the status of the configured Gearman job
+servers by fetching it using L<Net::Telnet::Gearman|Net::Telnet::Gearman> and
+turning it into a simple HTML page. This page contains information about the
+available workers and the status of the registered functions.
+
+=head2 new
+
+Constructor, creates new L<Plack::App::Gearman::Status|Plack::App::Gearman::Status>
+instance.
+
+=head3 Parameters
+
+This method expects its parameters as a hash reference.
+
+=over
+
+=item job_servers
+
+Array reference with the addresses of the job servers the application should
+connect to.
+
+=back
+
+=head2 parse_job_server_address
+
+Parses a job server address of the form C<hostname:port> with optional C<port>.
+If no port is given, it defaults to C<4730>.
+
+=head3 Parameters
+
+This method expects positional parameters.
+
+=over
+
+=item address
+
+The address to parse.
+
+=back
+
+=head3 Result
+
+A list with host and port.
+
+=head2 connection
+
+Connects to the given job server and returns the
+L<Net::Telnet::Gearman|Net::Telnet::Gearman> object.
+
+=head3 Parameters
+
+This method expects positional parameters.
+
+=over
+
+=item address
+
+Address of the job server to connect to.
+
+=back
+
+=head3 Result
+
+The L<Net::Telnet::Gearman|Net::Telnet::Gearman> instance on success, C<undef>
+otherwise.
+
+=head2 get_status
+
+Fetch status information from configured Gearman job servers.
+
+=head3 Result
+
+An array reference with hash references containing status information.
+
+=head2 call
+
+Specialized call method which retrieves the job server status information and
+transforms it to HTML.
+
+=head3 Result
+
+A L<PSGI|PSGI> response.
 
 =head1 SEE ALSO
 
@@ -369,7 +381,16 @@ TOKUHIROM which inspired this application.
 
 =back
 
-=cut
+=head1 AUTHOR
 
-1;
+Manfred Stock <mstock@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2012 by Manfred Stock.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
 
