@@ -80,7 +80,7 @@ sub connection_test : Test(1) {
 }
 
 
-sub parse_job_server_address_test : Test(16) {
+sub parse_job_server_address_test : Test(20) {
 	my ($self) = @_;
 
 	my $app = Plack::App::Gearman::Status->new();
@@ -99,6 +99,14 @@ sub parse_job_server_address_test : Test(16) {
 
 	($host, $port) = $app->parse_job_server_address('localhost.localdomain');
 	is($host, 'localhost.localdomain', 'host ok');
+	is($port, 4730, 'port ok');
+
+	($host, $port) = $app->parse_job_server_address('localhost-01.localdomain:1234');
+	is($host, 'localhost-01.localdomain', 'host ok');
+	is($port, 1234, 'port ok');
+
+	($host, $port) = $app->parse_job_server_address('localhost_01.localdomain');
+	is($host, 'localhost_01.localdomain', 'host ok');
 	is($port, 4730, 'port ok');
 
 	($host, $port) = $app->parse_job_server_address('[::1]:4730');

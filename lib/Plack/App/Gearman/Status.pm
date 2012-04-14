@@ -235,7 +235,7 @@ sub parse_job_server_address {
 
 	$address =~ m{^
 		# IPv6 address or hostname/IPv4 address
-		(?:\[([\d:]+)\]|([\w.]+))
+		(?:\[([\d:]+)\]|([\w.-]+))
 		# Optional port
 		(?::(\d+))?
 	$}xms or croak("Unable to parse address '$address'");
