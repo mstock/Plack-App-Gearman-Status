@@ -7,7 +7,6 @@ use Module::Build 0.3601;
 
 my %module_build_args = (
   "build_requires" => {
-    "English" => 0,
     "File::Find" => 0,
     "File::Temp" => 0,
     "IO::Socket::INET" => 0,
@@ -25,7 +24,7 @@ my %module_build_args = (
     "Manfred Stock <mstock\@cpan.org>"
   ],
   "dist_name" => "Plack-App-Gearman-Status",
-  "dist_version" => "0.001000",
+  "dist_version" => "0.001001",
   "license" => "perl",
   "module_name" => "Plack::App::Gearman::Status",
   "recommends" => {},

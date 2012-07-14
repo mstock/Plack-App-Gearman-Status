@@ -4,7 +4,7 @@
       "Manfred Stock <mstock@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 4.300010, CPAN::Meta::Converter version 2.120630",
+   "generated_by" : "Dist::Zilla version 4.300020, CPAN::Meta::Converter version 2.120921",
    "license" : [
       "perl_5"
    ],
@@ -45,7 +45,6 @@
       },
       "test" : {
          "requires" : {
-            "English" : "0",
             "File::Find" : "0",
             "File::Temp" : "0",
             "IO::Socket::INET" : "0",
@@ -64,6 +63,6 @@
          "web" : "https://github.com/mstock/Plack-App-Gearman-Status"
       }
    },
-   "version" : "0.001000"
+   "version" : "0.001001"
 }
 
